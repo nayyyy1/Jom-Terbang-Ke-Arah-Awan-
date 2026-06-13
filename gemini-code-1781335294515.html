@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terbang ke arah Awan yang tepat!</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --accent-color: #FFD166;
+            --grass-color: #06D6A0;
+            --sky-blue: #87CEEB;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Comic Sans MS', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #bfe3f7 0%, #e0f2fe 70%, #9be49b 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        /* Kampung Background Elements */
+        .kampung-bg {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 180px;
+            z-index: 1;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 60px;
+            left: -50px;
+            width: 300px;
+            height: 200px;
+            background: #7bc07b;
+            border-radius: 50% 50% 0 0;
+            opacity: 0.7;
+        }
+
+        .mountain-2 {
+            position: absolute;
+            bottom: 50px;
+            right: -80px;
+            width: 400px;
+            height: 250px;
+            background: #62b162;
+            border-radius: 50% 50% 0 0;
+            opacity: 0.6;
+        }
+
+        .house {
+            position: absolute;
+            bottom: 40px;
+            left: 20%;
+            width: 80px;
+            height: 60px;
+            background: #d2a679;
+            border: 3px solid #8a5a36;
+            border-radius: 4px;
+        }
+
+        .roof {
+            position: absolute;
+            bottom: 100px;
+            left: 19%;
+            width: 90px;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+            border-bottom: 40px solid #cc5533;
+        }
+
+        .padi-field {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to bottom, #a3e247, #7ec326);
+            border-top: 5px solid #8bc34a;
+        }
+
+        .coconut-tree {
+            position: absolute;
+            bottom: 50px;
+            right: 25%;
+            font-size: 50px;
+        }
+
+        /* Main Container */
+        .game-container {
+            width: 90%;
+            max-width: 800px;
+            height: 550px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border: 6px solid #fff;
+            border-radius: 24px;
+            position: relative;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* HUD & Buttons */
+        .hud {
+            position: absolute;
+            top: 20px;
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .score-board, .round-board {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px #e6b800;
+            transition: all 0.1s ease;
+            color: #4a3600;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px #e6b800;
+        }
+
+        .btn-nota {
+            background: #ff7096;
+            box-shadow: 0 6px #c93b63;
+            color: white;
+        }
+        .btn-nota:active { box-shadow: 0 2px #c93b63; }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .screen.active { display: flex; }
+
+        /* Title Screen */
+        h1 {
+            font-size: 2.5rem;
+            color: #1d3557;
+            text-shadow: 2px 2px white;
+            margin-bottom: 20px;
+        }
+
+        .input-name {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: 3px solid var(--primary-color);
+            margin-bottom: 20px;
+            width: 280px;
+            text-align: center;
+            outline: none;
+        }
+
+        /* Game Arena */
+        .clouds-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: -40px;
+        }
+
+        .cloud-option {
+            background: white;
+            width: 120px;
+            height: 90px;
+            border-radius: 50px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2b2d42;
+            cursor: pointer;
+            box-shadow: 0 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .cloud-option::before, .cloud-option::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud-option::before { width: 60px; height: 60px; top: -30px; left: 15px; }
+        .cloud-option::after { width: 70px; height: 70px; top: -40px; right: 15px; }
+
+        .cloud-option:hover {
+            transform: scale(1.08);
+        }
+
+        .cloud-text {
+            position: relative;
+            z-index: 5;
+            margin-top: -10px;
+        }
+
+        /* Bird Element */
+        .bird-container {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.8s ease-in-out;
+        }
+
+        .bird {
+            font-size: 4.5rem;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .paper {
+            background: #fffdf0;
+            border: 2px dashed #b5a46d;
+            padding: 6px 16px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: -10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: #d62828;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* Modal Nota */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 4px solid var(--primary-color);
+        }
+
+        .nota-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .nota-item {
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-around;
+            border: 2px solid #bcd7f5;
+        }
+
+        /* End Screen Animations */
+        .trophy { font-size: 5rem; animation: float 2s infinite; }
+        .congrats-text { font-size: 2rem; color: #38b000; margin: 15px 0; font-weight: bold;}
+        .feedback-pop {
+            position: absolute;
+            font-size: 2.5rem;
+            font-weight: bold;
+            animation: popUp 1s forwards;
+            z-index: 50;
+            display: none;
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mountain"></div>
+    <div class="mountain-2"></div>
+    <div class="roof"></div>
+    <div class="house"></div>
+    <div class="coconut-tree">🌴</div>
+    <div class="kampung-bg">
+        <div class="padi-field"></div>
+    </div>
+
+    <div class="game-container">
+        
+        <div class="hud" id="hud" style="display: none;">
+            <div class="round-board">Pusingan: <span id="round-num">1</span>/7</div>
+            <button class="btn btn-nota" onclick="bukaNota()">📖 Nota</button>
+            <div class="score-board">Markah: <span id="score-num">0</span></div>
+        </div>
+
+        <div id="feedback" class="feedback-pop"></div>
+
+        <div id="screen-start" class="screen active">
+            <h1>Terbang ke arah<br>Awan yang tepat! ☁️🦅</h1>
+            <input type="text" id="player-name" class="input-name" placeholder="Tulis nama anda di sini..." autocomplete="off">
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-nota" onclick="bukaNota()">📖 Lihat Nota</button>
+                <button class="btn" onclick="mulaGame()">Mula Main! ➔</button>
+            </div>
+        </div>
+
+        <div id="screen-game" class="screen">
+            <div class="clouds-container">
+                <div class="cloud-option" onclick="pilihJawapan(0)"><span class="cloud-text" id="c0">ا</span></div>
+                <div class="cloud-option" onclick="pilihJawapan(1)"><span class="cloud-text" id="c1">ب</span></div>
+                <div class="cloud-option" onclick="pilihJawapan(2)"><span class="cloud-text" id="c2">ت</span></div>
+            </div>
+
+            <div class="bird-container" id="player-bird">
+                <div class="bird">🐦</div>
+                <div class="paper" id="rumi-letter">A</div>
+            </div>
+        </div>
+
+        <div id="screen-end" class="screen">
+            <div class="trophy">🏆</div>
+            <div class="congrats-text" id="congrats-msg">Syabas!</div>
+            <h3 id="final-score" style="margin-bottom: 20px; color: #2c3e50;"></h3>
+            <button class="btn" onclick="mainSemula()">Main Semula ↺</button>
+        </div>
+
+    </div>
+
+    <div id="nota-modal" class="modal">
+        <div class="modal-content">
+            <h2>📖 Nota Padanan Huruf</h2>
+            <p style="color: #666; margin-bottom: 10px;">Rumi ke Jawi</p>
+            <div class="nota-grid">
+                <div class="nota-item"><span>A</span> <span>➔</span> <span>ا</span></div>
+                <div class="nota-item"><span>B</span> <span>➔</span> <span>ب</span></div>
+                <div class="nota-item"><span>T</span> <span>➔</span> <span>ت</span></div>
+                <div class="nota-item"><span>J</span> <span>➔</span> <span>ج</span></div>
+                <div class="nota-item"><span>D</span> <span>➔</span> <span>د</span></div>
+                <div class="nota-item"><span>R</span> <span>➔</span> <span>ر</span></div>
+                <div class="nota-item"><span>S</span> <span>➔</span> <span>س</span></div>
+            </div>
+            <button class="btn" style="padding: 8px 20px; font-size: 1rem;" onclick="tutupNota()">Tutup Nota</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Padanan Huruf Rumi ke Jawi (7 Pasangan untuk 7 Pusingan)
+        const bankSoalan = [
+            { rumi: 'A', jawi: 'ا', siriSalah: ['ب', 'ت'] },
+            { rumi: 'B', jawi: 'ب', siriSalah: ['ا', 'ج'] },
+            { rumi: 'T', jawi: 'ت', siriSalah: ['ب', 'د'] },
+            { rumi: 'J', jawi: 'ج', siriSalah: ['ر', 'س'] },
+            { rumi: 'D', jawi: 'د', siriSalah: ['ا', 'ر'] },
+            { rumi: 'R', jawi: 'ر', siriSalah: ['د', 'س'] },
+            { rumi: 'S', jawi: 'س', siriSalah: ['ج', 'ت'] }
+        ];
+
+        let soalanSemasa = [];
+        let pusingan = 0;
+        let markah = 0;
+        let namaPemain = "";
+        let jawapanBetulSiri = "";
+
+        // Fungsi Memulakan Game
+        function mulaGame() {
+            const input = document.getElementById('player-name');
+            namaPemain = input.value.trim();
+            
+            if (namaPemain === "") {
+                alert("Sila masukkan nama anda dahulu ya! 😊");
+                return;
+            }
+
+            // Reset data & susun rawak soalan
+            pusingan = 0;
+            markah = 0;
+            soalanSemasa = [...bankSoalan].sort(() => Math.random() - 0.5); // Rawakkan 7 soalan
+
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            document.getElementById('hud').style.display = 'flex';
+            document.getElementById('score-num').innerText = markah;
+
+            binaPusingan();
+        }
+
+        // Fungsi Membina Pusingan Baru
+        function binaPusingan() {
+            if (pusingan >= 7) {
+                tamatGame();
+                return;
+            }
+
+            document.getElementById('round-num').innerText = pusingan + 1;
+            
+            // Set burung kembali ke tengah bawah
+            const bird = document.getElementById('player-bird');
+            bird.style.left = "50%";
+            bird.style.bottom = "80px";
+
+            let dataSoalan = soalanSemasa[pusingan];
+            document.getElementById('rumi-letter').innerText = dataSoalan.rumi;
+            jawapanBetulSiri = dataSoalan.jawi;
+
+            // Gabung jawapan betul & salah kemudian dirawakkan posisinya
+            let pilihan = [dataSoalan.jawi, ...dataSoalan.siriSalah].sort(() => Math.random() - 0.5);
+
+            // Masukkan ke dalam awan
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`c${i}`).innerText = pilihan[i];
+            }
+        }
+
+        // Fungsi Memilih Jawapan (Awan diklik)
+        function pilihJawapan(indeks) {
+            let jawapanDipilih = document.getElementById(`c${indeks}`).innerText;
+            const bird = document.getElementById('player-bird');
+            const feedback = document.getElementById('feedback');
+
+            // Animasi Burung Terbang ke Awan yang Dipilih
+            if (indeks === 0) { bird.style.left = "20%"; bird.style.bottom = "320px"; }
+            else if (indeks === 1) { bird.style.left = "50%"; bird.style.bottom = "320px"; }
+            else if (indeks === 2) { bird.style.left = "80%"; bird.style.bottom = "320px"; }
+
+            // Semak Jawapan selepas burung selesai terbang seketika
+            setTimeout(() => {
+                feedback.style.display = 'block';
+                if (jawapanDipilih === jawapanBetulSiri) {
+                    markah += 10;
+                    document.getElementById('score-num').innerText = markah;
+                    feedback.innerText = "Betul! 🎉";
+                    feedback.style.color = "#38b000";
+                } else {
+                    feedback.innerText = "Salah! 🙊";
+                    feedback.style.color = "#d62828";
+                }
+
+                // Sembunyikan maklumbalas dan terus ke pusingan seterusnya
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    pusingan++;
+                    binaPusingan();
+                }, 1000);
+
+            }, 400);
+        }
+
+        // Fungsi Tamat Game
+        function tamatGame() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('screen-end').classList.add('active');
+
+            // Kata-kata semangat dinamik mengikut markah
+            let kataSemangat = "";
+            if (markah === 70) {
+                kataSemangat = `Syabas, ${namaPemain}! Anda memang hebat dan bijak! 🌟 Teruskan usaha cemerlang ini!`;
+            } else if (markah >= 40) {
+                kataSemangat = `Anda hebat, ${namaPemain}! Bagus sekali usaha anda! 💫 Sikit lagi nak dapat markah penuh.`;
+            } else {
+                kataSemangat = `Tahniah kerana mencuba, ${namaPemain}! Jangan putus asa, mari kita lihat nota dan main lagi! 💪`;
+            }
+
+            document.getElementById('congrats-msg').innerHTML = kataSemangat;
+            document.getElementById('final-score').innerText = `Jumlah Markah: ${markah} / 70`;
+        }
+
+        // Fungsi Main Semula
+        function mainSemula() {
+            document.getElementById('screen-end').classList.remove('active');
+            document.getElementById('screen-start').classList.add('active');
+            document.getElementById('player-name').value = "";
+        }
+
+        // Fungsi Kawalan Nota Modal
+        function bukaNota() { document.getElementById('nota-modal').style.display = 'flex'; }
+        function tutupNota() { document.getElementById('nota-modal').style.opacity = '0'; setTimeout(() => { document.getElementById('nota-modal').style.display = 'none'; document.getElementById('nota-modal').style.opacity = '1'; }, 200); }
+    </script>
+</body>
+</html>
